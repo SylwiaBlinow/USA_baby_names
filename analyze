@@ -63,3 +63,36 @@ SELECT year, first_name, num, SUM(num) OVER(ORDER BY year) AS cumulative_olivias
 FROM usa_baby_names
 WHERE first_name = 'Olivia'
 ORDER BY year;
+
+# the most popular male names since 1920
+
+SELECT bn.year, bn.first_name, bn.num 
+FROM usa_baby_names bn
+INNER JOIN (
+    SELECT year, MAX(num) as max_num
+    FROM usa_baby_names
+    WHERE sex = 'M'
+    GROUP BY year) subquery
+ON subquery.year = bn.year
+    AND subquery.max_num = bn.num
+ORDER BY year DESC
+
+
+# The most years at number one male name
+
+WITH top_male_names AS(
+    SELECT bn.year, bn.first_name, bn.num 
+    FROM usa_baby_names bn
+    INNER JOIN (
+        SELECT year, MAX(num) as max_num
+        FROM usa_baby_names
+        WHERE sex = 'M'
+        GROUP BY year) subquery
+    ON subquery.year = bn.year
+        AND subquery.max_num = bn.num
+    ORDER BY year DESC
+    )
+SELECT first_name, COUNT(first_name) AS count_top_name
+FROM top_male_names
+GROUP BY first_name
+ORDER BY COUNT(first_name) DESC;
